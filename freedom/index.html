@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Investment Calculator (Decreasing Contributions + Withdrawals with Inflation)</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  label { display: block; margin-top: 10px; }
+  input, select { padding: 5px; width: 200px; }
+  button { margin-top: 15px; padding: 8px 15px; }
+  table { border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: right; }
+  th { background-color: #f4f4f4; }
+</style>
+</head>
+<body>
+
+<h2>Investment Calculator (Decreasing Contributions + Withdrawals with Inflation)</h2>
+
+<label>Initial Investment:
+  <input type="number" id="initial" value="10000">
+</label>
+
+<label>Annual Interest Rate (%):
+  <input type="number" id="rate" value="5">
+</label>
+
+<label>Number of Years:
+  <input type="number" id="years" value="15">
+</label>
+
+<label>Starting Annual Contribution:
+  <input type="number" id="contribution" value="5000">
+</label>
+
+<label>Contribution Decrease Type:
+  <select id="decreaseType">
+    <option value="fixed">Fixed Amount</option>
+    <option value="percent">Percentage</option>
+  </select>
+</label>
+
+<label>Decrease Value:
+  <input type="number" id="decreaseValue" value="500">
+</label>
+
+<label>Compounding Frequency:
+  <select id="frequency">
+    <option value="1">Yearly</option>
+    <option value="12" selected>Monthly</option>
+  </select>
+</label>
+
+<hr>
+
+<label>Monthly Withdrawal (after start year):
+  <input type="number" id="monthlyWithdrawal" value="1000">
+</label>
+
+<label>Withdrawals Start After Year:
+  <input type="number" id="withdrawStartYear" value="5">
+</label>
+
+<label>Withdrawal Inflation Rate (% per year):
+  <input type="number" id="withdrawInflation" value="2">
+</label>
+
+<button onclick="calculate()">Calculate</button>
+
+<div id="results"></div>
+
+<script>
+function calculate() {
+  const initial = parseFloat(document.getElementById('initial').value);
+  const rate = parseFloat(document.getElementById('rate').value) / 100;
+  const years = parseInt(document.getElementById('years').value);
+  const startContribution = parseFloat(document.getElementById('contribution').value);
+  const decreaseType = document.getElementById('decreaseType').value;
+  const decreaseValue = parseFloat(document.getElementById('decreaseValue').value);
+  const freq = parseInt(document.getElementById('frequency').value);
+
+  let monthlyWithdrawal = parseFloat(document.getElementById('monthlyWithdrawal').value);
+  const withdrawStartYear = parseInt(document.getElementById('withdrawStartYear').value);
+  const withdrawInflation = parseFloat(document.getElementById('withdrawInflation').value) / 100;
+
+  let balance = initial;
+  let annualContribution = startContribution;
+
+  let output = `<table><tr>
+                  <th>Year</th>
+                  <th>Annual Contribution</th>
+                  <th>Monthly Contribution</th>
+                  <th>Annual Withdrawal</th>
+                  <th>Monthly Withdrawal</th>
+                  <th>End Balance</th>
+                </tr>`;
+
+  for (let y = 1; y <= years; y++) {
+    let perPeriodRate = rate / freq;
+    let periodContribution = annualContribution / freq;
+    let periodWithdrawal = 0;
+
+    let monthlyContributionDisplay = annualContribution / 12;
+    let monthlyWithdrawalDisplay = 0;
+    let yearlyWithdrawalDisplay = 0;
+
+    if (y > withdrawStartYear) {
+      monthlyWithdrawalDisplay = monthlyWithdrawal;
+      yearlyWithdrawalDisplay = monthlyWithdrawal * 12;
+      periodWithdrawal = yearlyWithdrawalDisplay / freq;
+    }
+
+    for (let p = 0; p < freq; p++) {
+      balance += periodContribution;
+      if (y > withdrawStartYear) balance -= periodWithdrawal;
+      balance *= (1 + perPeriodRate);
+    }
+
+    output += `<tr>
+                 <td>${y}</td>
+                 <td>${annualContribution.toFixed(2)}</td>
+                 <td>${monthlyContributionDisplay.toFixed(2)}</td>
+                 <td>${yearlyWithdrawalDisplay.toFixed(2)}</td>
+                 <td>${monthlyWithdrawalDisplay.toFixed(2)}</td>
+                 <td>${balance.toFixed(2)}</td>
+               </tr>`;
+
+    // Decrease contributions for next year
+    if (decreaseType === "fixed") {
+      annualContribution = Math.max(0, annualContribution - decreaseValue);
+    } else if (decreaseType === "percent") {
+      annualContribution = Math.max(0, annualContribution * (1 - decreaseValue / 100));
+    }
+
+    // Increase withdrawals for next year (inflation)
+    if (y >= withdrawStartYear) {
+      monthlyWithdrawal *= (1 + withdrawInflation);
+    }
+  }
+
+  output += "</table>";
+  document.getElementById('results').innerHTML = output;
+}
+</script>
+
+</body>
+</html>
