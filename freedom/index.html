@@ -11,7 +11,55 @@
   table { border-collapse: collapse; margin-top: 20px; }
   th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: right; }
   th { background-color: #f4f4f4; }
+  .tooltip {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    font-weight: bold;
+    color: #0077cc;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    text-align: center;
+    line-height: 18px;
+    font-size: 12px;
+    background-color: #e0e0e0;
+    margin-left: 5px;
+  }
+  .tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    width: 250px;
+    background-color: #333;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 8px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; /* Above the icon */
+    left: 50%;
+    transform: translateX(-50%);
+    transition: opacity 0.3s;
+    font-size: 13px;
+  }
+  .tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+  }
+  .tooltip:focus .tooltip-text,
+  .tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+  }
 </style>
+
 </head>
 <body>
 
@@ -21,19 +69,18 @@
   <input type="number" id="initial" value="0">
 </label>
 
-<label>
-  Annual Interest Rate (%):
-  <span title="Typical ranges:
-• S&P 500 ETF: 7–10%
-• Dividend ETFs: 5–8%
-• Govt Bonds: 3–5%
-• Corp Bonds: 4–6%
-• High-yield Bonds: 7–10%
-• Bank Deposits: 3–5%
-• REITs: 6–9%">
-    ❓
-  </span>
+<label>Annual Interest Rate (%):
   <input type="number" id="rate" value="7">
+  <span class="tooltip" tabindex="0">?
+    <span class="tooltip-text">
+      Common averages:<br>
+      • S&P 500 ETF: ~8%<br>
+      • Govt Bonds: ~4%<br>
+      • Corp Bonds: ~5–7%<br>
+      • Deposits/CDs: ~3–5%<br>
+      • REITs: ~6–9%
+    </span>
+  </span>
 </label>
   
 <label>Number of Years:
