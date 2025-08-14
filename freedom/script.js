@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   async function getAIExplanation(apiKey) {
-    explanationDiv.innerHTML = '<div class="spinner"></div>';
+    explanationDiv.innerHTML = '<div class="loading-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div>';
     explanationDiv.style.display = 'block';
 
     const inputs = {
@@ -161,7 +161,7 @@ Generate a natural language summary.
     `;
 
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
