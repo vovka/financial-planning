@@ -116,13 +116,35 @@
       </label>
 
       <button onclick="triggerCalculation()">Calculate</button>
+      <button id="aiExplainButton" disabled>AI Explain</button>
     </div>
   </div>
   <div class="results-wrapper">
     <div id="results-container" style="position: relative;">
       <div id="spinner" class="spinner" style="display: none;"></div>
       <div id="results"></div>
+      <div id="ai-explanation" class="ai-explanation-container"></div>
     </div>
+  </div>
+</div>
+
+<div id="apiKeyModal" class="modal">
+  <div class="modal-content">
+    <span class="close-button">&times;</span>
+    <h3>Enter API Key</h3>
+    <p>To use the AI Explain feature, you need to provide your own Google Gemini API key.</p>
+    <div class="modal-instructions">
+      <strong>How to get your Google AI API Key:</strong>
+      <ol>
+        <li>Go to <a href="https://aistudio.google.com/" target="_blank">Google AI Studio</a>.</li>
+        <li>Sign in with your Google account.</li>
+        <li>Click on <strong>"Get API key"</strong> (usually in the top-left).</li>
+        <li>Click <strong>"Create API key in new project"</strong>.</li>
+        <li>Copy the generated key.</li>
+      </ol>
+    </div>
+    <input type="password" id="apiKeyInput" placeholder="Paste your API key here">
+    <button id="saveApiKeyButton">Save and Continue</button>
   </div>
 </div>
 
