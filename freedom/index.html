@@ -82,10 +82,13 @@
     <input type="number" id="withdrawInflation" value="3">
   </label>
 
-  <button onclick="calculate()">Calculate</button>
+  <button onclick="triggerCalculation()">Calculate</button>
 </div>
 
-<div id="results"></div>
+<div id="results-container" style="position: relative;">
+  <div id="spinner" class="spinner" style="display: none;"></div>
+  <div id="results"></div>
+</div>
 
 <script src="script.js"></script>
 

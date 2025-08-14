@@ -1,11 +1,46 @@
+let hasCalculatedOnce = false;
+let debounceTimer;
+
+// This is the new wrapper function that handles UI effects
+function triggerCalculation() {
+  const resultsDiv = document.getElementById('results');
+  const spinner = document.getElementById('spinner');
+
+  // Show spinner and fade table
+  spinner.style.display = 'block';
+  resultsDiv.classList.add('fading');
+
+  // Use a short timeout to allow the UI to update before the calculation runs
+  setTimeout(() => {
+    calculate(); // Run the original calculation logic
+
+    // Hide spinner and fade table back in
+    spinner.style.display = 'none';
+    resultsDiv.classList.remove('fading');
+  }, 50);
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
   const initialInput = document.getElementById('initial');
   const initialSlider = document.getElementById('initialSlider');
+
+  function handleAutoRecalculate() {
+    if (hasCalculatedOnce) {
+      // Clear the previous timer to reset the debounce period
+      clearTimeout(debounceTimer);
+      // Set a new timer
+      debounceTimer = setTimeout(() => {
+        triggerCalculation();
+      }, 500); // 500ms debounce time
+    }
+  }
 
   if (initialInput && initialSlider) {
     // Sync slider to input
     initialSlider.addEventListener('input', () => {
       initialInput.value = initialSlider.value;
+      handleAutoRecalculate(); // Trigger auto-recalc
     });
 
     // Sync input to slider
@@ -16,10 +51,12 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         initialSlider.value = initialInput.value;
       }
+      handleAutoRecalculate(); // Trigger auto-recalc
     });
   }
 });
 
+// This function now just contains the core calculation logic
 function calculate() {
   const initial = parseFloat(document.getElementById('initial').value);
   const rate = parseFloat(document.getElementById('rate').value) / 100;
@@ -51,7 +88,6 @@ function calculate() {
     let perPeriodRate = rate / freq;
     let periodContribution = 0;
 
-    // Stop contributions after limit year (if set)
     if (contributionLimit === 0 || y <= contributionLimit) {
       periodContribution = annualContribution / freq;
     }
@@ -83,7 +119,6 @@ function calculate() {
                  <td>${balance.toFixed(2)}</td>
                </tr>`;
 
-    // Decrease contribution only if still contributing next year
     if ((contributionLimit === 0 || y < contributionLimit)) {
       if (decreaseType === "fixed") {
         annualContribution = Math.max(0, annualContribution - decreaseValue);
@@ -92,7 +127,6 @@ function calculate() {
       }
     }
 
-    // Apply withdrawal inflation after each year if in withdrawal phase
     if (y >= withdrawStartYear) {
       netMonthlyWithdrawal *= (1 + withdrawInflation);
     }
@@ -100,4 +134,9 @@ function calculate() {
 
   output += "</table>";
   document.getElementById('results').innerHTML = output;
+
+  // Set the flag to true after the first successful calculation
+  if (!hasCalculatedOnce) {
+    hasCalculatedOnce = true;
+  }
 }
