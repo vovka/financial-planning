@@ -138,6 +138,27 @@ th { background-color: #f4f4f4; }
   }
 }
 
+/* More specific mobile styles */
+@media (max-width: 768px) {
+  label {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 15px;
+  }
+
+  label > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  input, select {
+    width: 100%; /* Make inputs take full width of their container */
+  }
+}
+
 .radio-group-horizontal, .radio-group-vertical {
   display: flex;
   align-items: center;
