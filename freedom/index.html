@@ -78,9 +78,9 @@
 
       <label class="label-for-radio">Compounding Frequency:
         <div class="radio-group-vertical">
-          <input type="radio" id="freqYearly" name="frequency" value="1">
+          <input type="radio" id="freqYearly" name="frequency" value="1" checked>
           <label for="freqYearly">Yearly</label>
-          <input type="radio" id="freqMonthly" name="frequency" value="12" checked>
+          <input type="radio" id="freqMonthly" name="frequency" value="12">
           <label for="freqMonthly">Monthly</label>
         </div>
       </label>
@@ -94,10 +94,10 @@
         </div>
       </label>
 
-      <label>Investment Tax Fee (%):
+      <label>Investment Tax (%):
         <div>
           <input type="number" id="taxRate" value="0" step="0.1">
-          <input type="range" id="taxRateSlider" min="0" max="5" step="0.1" value="0">
+          <input type="range" id="taxRateSlider" min="0" max="100" step="1" value="23">
         </div>
       </label>
 
