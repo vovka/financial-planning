@@ -161,7 +161,7 @@ Generate a natural language summary.
     `;
 
     try {
-      const response = await fetch(\`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=\${apiKey}\`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -181,7 +181,7 @@ Generate a natural language summary.
       explanationDiv.innerHTML = explanation;
 
     } catch (error) {
-      explanationDiv.innerHTML = \`Error: \${error.message}. Please check your API key or network connection.\`;
+      explanationDiv.innerHTML = `Error: ${error.message}. Please check your API key or network connection.`;
       localStorage.removeItem('geminiApiKey'); // Clear invalid key
     }
   }
