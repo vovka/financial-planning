@@ -22,38 +22,56 @@ function triggerCalculation() {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  const initialInput = document.getElementById('initial');
-  const initialSlider = document.getElementById('initialSlider');
-
   function handleAutoRecalculate() {
     if (hasCalculatedOnce) {
-      // Clear the previous timer to reset the debounce period
       clearTimeout(debounceTimer);
-      // Set a new timer
       debounceTimer = setTimeout(() => {
         triggerCalculation();
-      }, 500); // 500ms debounce time
+      }, 500);
     }
   }
 
-  if (initialInput && initialSlider) {
-    // Sync slider to input
-    initialSlider.addEventListener('input', () => {
-      initialInput.value = initialSlider.value;
-      handleAutoRecalculate(); // Trigger auto-recalc
-    });
+  function setupSliderSync(inputId, sliderId) {
+    const input = document.getElementById(inputId);
+    const slider = document.getElementById(sliderId);
 
-    // Sync input to slider
-    initialInput.addEventListener('input', () => {
-      // Prevent errors if input is empty or invalid
-      if (initialInput.value === '' || isNaN(parseFloat(initialInput.value))) {
-        initialSlider.value = 0;
-      } else {
-        initialSlider.value = initialInput.value;
-      }
-      handleAutoRecalculate(); // Trigger auto-recalc
+    if (input && slider) {
+      slider.addEventListener('input', () => {
+        input.value = slider.value;
+        handleAutoRecalculate();
+      });
+
+      input.addEventListener('input', () => {
+        if (input.value === '' || isNaN(parseFloat(input.value))) {
+          slider.value = 0;
+        } else {
+          slider.value = input.value;
+        }
+        handleAutoRecalculate();
+      });
+    }
+  }
+
+  function setupRadioListeners(radioGroupName) {
+    const radios = document.getElementsByName(radioGroupName);
+    radios.forEach(radio => {
+      radio.addEventListener('change', handleAutoRecalculate);
     });
   }
+
+  setupSliderSync('initial', 'initialSlider');
+  setupSliderSync('rate', 'rateSlider');
+  setupSliderSync('years', 'yearsSlider');
+  setupSliderSync('contribution', 'contributionSlider');
+  setupSliderSync('decreaseValue', 'decreaseValueSlider');
+  setupSliderSync('contributionLimit', 'contributionLimitSlider');
+  setupSliderSync('monthlyWithdrawal', 'monthlyWithdrawalSlider');
+  setupSliderSync('taxRate', 'taxRateSlider');
+  setupSliderSync('withdrawStartYear', 'withdrawStartYearSlider');
+  setupSliderSync('withdrawInflation', 'withdrawInflationSlider');
+
+  setupRadioListeners('decreaseType');
+  setupRadioListeners('frequency');
 });
 
 // This function now just contains the core calculation logic
@@ -62,10 +80,10 @@ function calculate() {
   const rate = parseFloat(document.getElementById('rate').value) / 100;
   const years = parseInt(document.getElementById('years').value);
   const startContribution = parseFloat(document.getElementById('contribution').value);
-  const decreaseType = document.getElementById('decreaseType').value;
+  const decreaseType = document.querySelector('input[name="decreaseType"]:checked').value;
   const decreaseValue = parseFloat(document.getElementById('decreaseValue').value);
   const contributionLimit = parseInt(document.getElementById('contributionLimit').value) || 0;
-  const freq = parseInt(document.getElementById('frequency').value);
+  const freq = parseInt(document.querySelector('input[name="frequency"]:checked').value);
 
   let netMonthlyWithdrawal = parseFloat(document.getElementById('monthlyWithdrawal').value);
   const taxRate = parseFloat(document.getElementById('taxRate').value) / 100;
