@@ -22,38 +22,170 @@ function triggerCalculation() {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  const initialInput = document.getElementById('initial');
-  const initialSlider = document.getElementById('initialSlider');
-
   function handleAutoRecalculate() {
     if (hasCalculatedOnce) {
-      // Clear the previous timer to reset the debounce period
       clearTimeout(debounceTimer);
-      // Set a new timer
       debounceTimer = setTimeout(() => {
         triggerCalculation();
-      }, 500); // 500ms debounce time
+      }, 500);
     }
   }
 
-  if (initialInput && initialSlider) {
-    // Sync slider to input
-    initialSlider.addEventListener('input', () => {
-      initialInput.value = initialSlider.value;
-      handleAutoRecalculate(); // Trigger auto-recalc
-    });
+  function setupSliderSync(inputId, sliderId) {
+    const input = document.getElementById(inputId);
+    const slider = document.getElementById(sliderId);
 
-    // Sync input to slider
-    initialInput.addEventListener('input', () => {
-      // Prevent errors if input is empty or invalid
-      if (initialInput.value === '' || isNaN(parseFloat(initialInput.value))) {
-        initialSlider.value = 0;
-      } else {
-        initialSlider.value = initialInput.value;
-      }
-      handleAutoRecalculate(); // Trigger auto-recalc
+    if (input && slider) {
+      slider.addEventListener('input', () => {
+        input.value = slider.value;
+        handleAutoRecalculate();
+      });
+
+      input.addEventListener('input', () => {
+        if (input.value === '' || isNaN(parseFloat(input.value))) {
+          slider.value = 0;
+        } else {
+          slider.value = input.value;
+        }
+        handleAutoRecalculate();
+      });
+    }
+  }
+
+  function setupRadioListeners(radioGroupName) {
+    const radios = document.getElementsByName(radioGroupName);
+    radios.forEach(radio => {
+      radio.addEventListener('change', handleAutoRecalculate);
     });
   }
+
+  setupSliderSync('initial', 'initialSlider');
+  setupSliderSync('rate', 'rateSlider');
+  setupSliderSync('years', 'yearsSlider');
+  setupSliderSync('contribution', 'contributionSlider');
+  setupSliderSync('decreaseValue', 'decreaseValueSlider');
+  setupSliderSync('contributionLimit', 'contributionLimitSlider');
+  setupSliderSync('monthlyWithdrawal', 'monthlyWithdrawalSlider');
+  setupSliderSync('taxRate', 'taxRateSlider');
+  setupSliderSync('withdrawStartYear', 'withdrawStartYearSlider');
+  setupSliderSync('withdrawInflation', 'withdrawInflationSlider');
+
+  setupRadioListeners('decreaseType');
+  setupRadioListeners('frequency');
+
+  const aiExplainButton = document.getElementById('aiExplainButton');
+  const apiKeyModal = document.getElementById('apiKeyModal');
+  const closeButton = document.querySelector('.close-button');
+  const saveApiKeyButton = document.getElementById('saveApiKeyButton');
+  const apiKeyInput = document.getElementById('apiKeyInput');
+  const explanationDiv = document.getElementById('ai-explanation');
+
+  aiExplainButton.addEventListener('click', () => {
+    let apiKey = localStorage.getItem('geminiApiKey');
+    if (!apiKey) {
+      apiKeyModal.style.display = 'block';
+    } else {
+      getAIExplanation(apiKey);
+    }
+  });
+
+  closeButton.addEventListener('click', () => {
+    apiKeyModal.style.display = 'none';
+  });
+
+  saveApiKeyButton.addEventListener('click', () => {
+    const apiKey = apiKeyInput.value.trim();
+    if (apiKey) {
+      localStorage.setItem('geminiApiKey', apiKey);
+      apiKeyModal.style.display = 'none';
+      getAIExplanation(apiKey);
+    } else {
+      alert('Please enter a valid API key.');
+    }
+  });
+
+  window.addEventListener('click', (event) => {
+    if (event.target == apiKeyModal) {
+      apiKeyModal.style.display = 'none';
+    }
+  });
+
+  async function getAIExplanation(apiKey) {
+    explanationDiv.innerHTML = '<div class="spinner"></div>';
+    explanationDiv.style.display = 'block';
+
+    const inputs = {
+      initial: document.getElementById('initial').value,
+      rate: document.getElementById('rate').value,
+      years: document.getElementById('years').value,
+      startContribution: document.getElementById('contribution').value,
+      decreaseType: document.querySelector('input[name="decreaseType"]:checked').value,
+      decreaseValue: document.getElementById('decreaseValue').value,
+      contributionLimit: document.getElementById('contributionLimit').value || 'no limit',
+      freq: document.querySelector('input[name="frequency"]:checked').value === '12' ? 'Monthly' : 'Yearly',
+      netMonthlyWithdrawal: document.getElementById('monthlyWithdrawal').value,
+      taxRate: document.getElementById('taxRate').value,
+      withdrawStartYear: document.getElementById('withdrawStartYear').value,
+      withdrawInflation: document.getElementById('withdrawInflation').value,
+    };
+
+    const resultsTable = document.querySelector('#results table');
+    let resultsSummary = 'No results calculated yet.';
+    if (resultsTable) {
+      const finalRow = resultsTable.rows[resultsTable.rows.length - 1];
+      const finalBalance = finalRow.cells[finalRow.cells.length - 1].innerText;
+      resultsSummary = `The final balance after ${inputs.years} years is ${finalBalance}.`;
+    }
+
+    const prompt = `
+You are a helpful financial assistant. Based on the following investment calculator inputs and results, provide a simple, one-paragraph explanation for a non-expert. Explain what the user is planning to do and what the outcome will be. Be concise and clear.
+
+**Inputs:**
+- Initial Investment: $${inputs.initial}
+- Annual Interest Rate: ${inputs.rate}%
+- Number of Years to Grow: ${inputs.years}
+- Starting Annual Contribution: $${inputs.startContribution}
+- Contribution Decrease Type: ${inputs.decreaseType}
+- Contribution Decrease Value: ${inputs.decreaseValue}
+- Contribution Limit Years: ${inputs.contributionLimit}
+- Compounding Frequency: ${inputs.freq}
+- Monthly Withdrawal (Net): $${inputs.netMonthlyWithdrawal}
+- Investment Tax Fee: ${inputs.taxRate}%
+- Withdrawals Start After Year: ${inputs.withdrawStartYear}
+- Withdrawal Inflation Rate: ${inputs.withdrawInflation}%
+
+**Calculation Summary:**
+${resultsSummary}
+
+Generate a natural language summary.
+    `;
+
+    try {
+      const response = await fetch(\`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=\${apiKey}\`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error.message || 'API Error');
+      }
+
+      const data = await response.json();
+      const explanation = data.candidates[0].content.parts[0].text;
+      explanationDiv.innerHTML = explanation;
+
+    } catch (error) {
+      explanationDiv.innerHTML = \`Error: \${error.message}. Please check your API key or network connection.\`;
+      localStorage.removeItem('geminiApiKey'); // Clear invalid key
+    }
+  }
+
 });
 
 // This function now just contains the core calculation logic
@@ -62,10 +194,10 @@ function calculate() {
   const rate = parseFloat(document.getElementById('rate').value) / 100;
   const years = parseInt(document.getElementById('years').value);
   const startContribution = parseFloat(document.getElementById('contribution').value);
-  const decreaseType = document.getElementById('decreaseType').value;
+  const decreaseType = document.querySelector('input[name="decreaseType"]:checked').value;
   const decreaseValue = parseFloat(document.getElementById('decreaseValue').value);
   const contributionLimit = parseInt(document.getElementById('contributionLimit').value) || 0;
-  const freq = parseInt(document.getElementById('frequency').value);
+  const freq = parseInt(document.querySelector('input[name="frequency"]:checked').value);
 
   let netMonthlyWithdrawal = parseFloat(document.getElementById('monthlyWithdrawal').value);
   const taxRate = parseFloat(document.getElementById('taxRate').value) / 100;
@@ -139,4 +271,5 @@ function calculate() {
   if (!hasCalculatedOnce) {
     hasCalculatedOnce = true;
   }
+  document.getElementById('aiExplainButton').disabled = false;
 }
