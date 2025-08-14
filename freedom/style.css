@@ -1,7 +1,25 @@
 body { font-family: Arial, sans-serif; margin: 20px; }
+
+/* Layout Containers */
+.main-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+}
+
+.form-wrapper {
+  flex: 0 0 650px; /* Do not grow, do not shrink, base width 650px */
+  position: sticky;
+  top: 20px;
+}
+
+.results-wrapper {
+  flex-grow: 1; /* Take up remaining space */
+}
+
 .form-container {
   max-width: 650px;
-  margin: 20px auto;
+  /* margin: 20px auto; REMOVED for flexbox layout */
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -22,7 +40,7 @@ label > div {
 
 input, select { padding: 5px; width: 220px; box-sizing: border-box; }
 button { margin-top: 15px; padding: 8px 15px; }
-table { border-collapse: collapse; margin-top: 20px; }
+table { border-collapse: collapse; margin-top: 20px; width: 100%; } /* Ensure table takes full width of its container */
 th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: right; }
 th { background-color: #f4f4f4; }
 .tooltip {
@@ -96,4 +114,20 @@ th { background-color: #f4f4f4; }
 #results.fading {
   opacity: 0.3;
   transition: opacity 0.3s ease-in-out;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .main-container {
+    flex-direction: column;
+  }
+
+  .form-wrapper {
+    position: static; /* Remove sticky positioning on mobile */
+    width: 100%;
+  }
+
+  .form-container {
+     max-width: none; /* Allow form to take full width */
+  }
 }
