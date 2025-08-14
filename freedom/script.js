@@ -1,3 +1,25 @@
+document.addEventListener('DOMContentLoaded', () => {
+  const initialInput = document.getElementById('initial');
+  const initialSlider = document.getElementById('initialSlider');
+
+  if (initialInput && initialSlider) {
+    // Sync slider to input
+    initialSlider.addEventListener('input', () => {
+      initialInput.value = initialSlider.value;
+    });
+
+    // Sync input to slider
+    initialInput.addEventListener('input', () => {
+      // Prevent errors if input is empty or invalid
+      if (initialInput.value === '' || isNaN(parseFloat(initialInput.value))) {
+        initialSlider.value = 0;
+      } else {
+        initialSlider.value = initialInput.value;
+      }
+    });
+  }
+});
+
 function calculate() {
   const initial = parseFloat(document.getElementById('initial').value);
   const rate = parseFloat(document.getElementById('rate').value) / 100;
