@@ -131,3 +131,33 @@ th { background-color: #f4f4f4; }
      max-width: none; /* Allow form to take full width */
   }
 }
+
+.radio-group-horizontal, .radio-group-vertical {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.radio-group-horizontal {
+  flex-direction: row;
+}
+
+.radio-group-vertical {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.radio-group-horizontal input[type="radio"], .radio-group-vertical input[type="radio"] {
+  margin-right: 5px;
+}
+
+.radio-group-horizontal label, .radio-group-vertical label {
+  margin-right: 15px;
+  font-weight: normal;
+}
+
+.label-for-radio {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+}
