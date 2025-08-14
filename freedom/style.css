@@ -1,0 +1,54 @@
+body { font-family: Arial, sans-serif; margin: 20px; }
+label { display: block; margin-top: 10px; }
+input, select { padding: 5px; width: 200px; }
+button { margin-top: 15px; padding: 8px 15px; }
+table { border-collapse: collapse; margin-top: 20px; }
+th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: right; }
+th { background-color: #f4f4f4; }
+.tooltip {
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  font-weight: bold;
+  color: #0077cc;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  text-align: center;
+  line-height: 18px;
+  font-size: 12px;
+  background-color: #e0e0e0;
+  margin-left: 5px;
+}
+.tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  width: 250px;
+  background-color: #333;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%; /* Above the icon */
+  left: 50%;
+  transform: translateX(-50%);
+  transition: opacity 0.3s;
+  font-size: 13px;
+}
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+.tooltip:focus .tooltip-text,
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
