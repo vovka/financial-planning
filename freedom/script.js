@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   async function getAIExplanation(apiKey) {
-    explanationDiv.innerHTML = '<div class="spinner"></div>';
+    explanationDiv.innerHTML = '<div class="loading-dots"><span class="dot1"></span><span class="dot2"></span><span class="dot3"></span></div>';
     explanationDiv.style.display = 'block';
 
     const inputs = {
