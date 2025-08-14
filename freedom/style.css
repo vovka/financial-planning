@@ -1,8 +1,46 @@
 body { font-family: Arial, sans-serif; margin: 20px; }
-label { display: block; margin-top: 10px; }
-input, select { padding: 5px; width: 200px; }
+
+/* Layout Containers */
+.main-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+}
+
+.form-wrapper {
+  flex: 0 0 650px; /* Do not grow, do not shrink, base width 650px */
+  position: sticky;
+  top: 20px;
+}
+
+.results-wrapper {
+  flex-grow: 1; /* Take up remaining space */
+}
+
+.form-container {
+  max-width: 650px;
+  /* margin: 20px auto; REMOVED for flexbox layout */
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+label > div {
+  display: flex;
+  align-items: center;
+}
+
+input, select { padding: 5px; width: 220px; box-sizing: border-box; }
 button { margin-top: 15px; padding: 8px 15px; }
-table { border-collapse: collapse; margin-top: 20px; }
+table { border-collapse: collapse; margin-top: 20px; width: 100%; } /* Ensure table takes full width of its container */
 th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: right; }
 th { background-color: #f4f4f4; }
 .tooltip {
@@ -18,7 +56,7 @@ th { background-color: #f4f4f4; }
   line-height: 18px;
   font-size: 12px;
   background-color: #e0e0e0;
-  margin-left: 5px;
+  margin-left: 10px;
 }
 .tooltip-text {
   visibility: hidden;
@@ -51,4 +89,45 @@ th { background-color: #f4f4f4; }
 .tooltip:hover .tooltip-text {
   visibility: visible;
   opacity: 1;
+}
+
+/* Spinner and Fading Styles */
+.spinner {
+  border: 5px solid #f3f3f3; /* Light grey */
+  border-top: 5px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  position: absolute;
+  top: 50px; /* Adjust as needed */
+  left: 50%;
+  margin-left: -25px; /* Half of width */
+  z-index: 10;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#results.fading {
+  opacity: 0.3;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .main-container {
+    flex-direction: column;
+  }
+
+  .form-wrapper {
+    position: static; /* Remove sticky positioning on mobile */
+    width: 100%;
+  }
+
+  .form-container {
+     max-width: none; /* Allow form to take full width */
+  }
 }
