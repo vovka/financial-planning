@@ -10,75 +10,85 @@
 
 <h2>Investment Calculator (Decreasing Contributions + Withdrawals with Inflation & Tax)</h2>
 
-<label>Initial Investment:
-  <input type="number" id="initial" value="0">
-</label>
+<div class="form-container">
+  <label>Initial Investment:
+    <div>
+      <input type="number" id="initial" value="0">
+      <input type="range" id="initialSlider" min="0" max="1000000" step="1000" value="0">
+    </div>
+  </label>
 
-<label>Annual Interest Rate (%):
-  <input type="number" id="rate" value="7">
-  <span class="tooltip" tabindex="0">?
-    <span class="tooltip-text">
-      Common averages:<br>
-      • S&P 500 ETF: ~8%<br>
-      • Govt Bonds: ~4%<br>
-      • Corp Bonds: ~5–7%<br>
-      • Deposits/CDs: ~3–5%<br>
-      • REITs: ~6–9%
-    </span>
-  </span>
-</label>
-  
-<label>Number of Years:
-  <input type="number" id="years" value="50">
-</label>
+  <label>
+    <div>Annual Interest Rate (%)
+      <span class="tooltip" tabindex="0">?
+        <span class="tooltip-text">
+          Common averages:<br>
+          • S&P 500 ETF: ~8%<br>
+          • Govt Bonds: ~4%<br>
+          • Corp Bonds: ~5–7%<br>
+          • Deposits/CDs: ~3–5%<br>
+          • REITs: ~6–9%
+        </span>
+      </span>
+    </div>
+    <input type="number" id="rate" value="7">
+  </label>
 
-<label>Starting Annual Contribution:
-  <input type="number" id="contribution" value="18000">
-</label>
+  <label>Number of Years:
+    <input type="number" id="years" value="50">
+  </label>
 
-<label>Contribution Decrease Type:
-  <select id="decreaseType">
-    <option value="fixed" selected>Fixed Amount</option>
-    <option value="percent">Percentage</option>
-  </select>
-</label>
+  <label>Starting Annual Contribution:
+    <input type="number" id="contribution" value="18000">
+  </label>
 
-<label>Decrease Value:
-  <input type="number" id="decreaseValue" value="1500">
-</label>
+  <label>Contribution Decrease Type:
+    <select id="decreaseType">
+      <option value="fixed" selected>Fixed Amount</option>
+      <option value="percent">Percentage</option>
+    </select>
+  </label>
 
-<label>Contribution Limit Years (leave blank for no limit):
-  <input type="number" id="contributionLimit" placeholder="">
-</label>
+  <label>Decrease Value:
+    <input type="number" id="decreaseValue" value="1500">
+  </label>
 
-<label>Compounding Frequency:
-  <select id="frequency">
-    <option value="1">Yearly</option>
-    <option value="12" selected>Monthly</option>
-  </select>
-</label>
+  <label>Contribution Limit Years (leave blank for no limit):
+    <input type="number" id="contributionLimit" placeholder="">
+  </label>
 
-<hr>
+  <label>Compounding Frequency:
+    <select id="frequency">
+      <option value="1">Yearly</option>
+      <option value="12" selected>Monthly</option>
+    </select>
+  </label>
 
-<label>Monthly Withdrawal (after start year) - Net (after tax):
-  <input type="number" id="monthlyWithdrawal" value="1000">
-</label>
+  <hr>
 
-<label>Investment Tax Fee (%):
-  <input type="number" id="taxRate" value="0">
-</label>
+  <label>Monthly Withdrawal (after start year) - Net (after tax):
+    <input type="number" id="monthlyWithdrawal" value="1000">
+  </label>
 
-<label>Withdrawals Start After Year:
-  <input type="number" id="withdrawStartYear" value="20">
-</label>
+  <label>Investment Tax Fee (%):
+    <input type="number" id="taxRate" value="0">
+  </label>
 
-<label>Withdrawal Inflation Rate (% per year):
-  <input type="number" id="withdrawInflation" value="3">
-</label>
+  <label>Withdrawals Start After Year:
+    <input type="number" id="withdrawStartYear" value="20">
+  </label>
 
-<button onclick="calculate()">Calculate</button>
+  <label>Withdrawal Inflation Rate (% per year):
+    <input type="number" id="withdrawInflation" value="3">
+  </label>
 
-<div id="results"></div>
+  <button onclick="triggerCalculation()">Calculate</button>
+</div>
+
+<div id="results-container" style="position: relative;">
+  <div id="spinner" class="spinner" style="display: none;"></div>
+  <div id="results"></div>
+</div>
 
 <script src="script.js"></script>
 
