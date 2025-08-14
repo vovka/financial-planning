@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Sync input to slider
     initialInput.addEventListener('input', () => {
+      // Prevent errors if input is empty or invalid
       if (initialInput.value === '' || isNaN(parseFloat(initialInput.value))) {
         initialSlider.value = 0;
       } else {
