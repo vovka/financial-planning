@@ -151,6 +151,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.documentElement.classList.add('cursor-help-active');
+
+    // Add a one-time click listener to switch to a wait cursor
+    const switchCursorToWait = () => {
+      document.documentElement.classList.remove('cursor-help-active');
+      document.documentElement.classList.add('cursor-wait-active');
+    };
+    document.addEventListener('click', switchCursorToWait, { once: true, capture: true });
+
+
     const overrides = { pageHtml: document.documentElement.outerHTML };
 
     window.ElementInspector.captureAndExplain(overrides)
@@ -198,16 +207,79 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Capture or explanation error: ' + (err && err.message));
       })
       .finally(function() {
+        // remove the temporary listener if it hasn't fired
+        document.removeEventListener('click', switchCursorToWait, { once: true, capture: true });
         document.documentElement.classList.remove('cursor-help-active');
+        document.documentElement.classList.remove('cursor-wait-active');
       });
   }
 
   const globalExplainButton = document.getElementById('globalExplainButton');
   if (globalExplainButton) {
-    globalExplainButton.addEventListener('click', async () => {
-      const apiKey = await requestGeminiApiKey();
-      startGlobalInspector(apiKey);
-    });
+    let isDragging = false;
+    let wasDragged = false;
+    let startX, startY, offsetX, offsetY;
+    const dragThreshold = 5;
+
+    const onPointerDown = (e) => {
+      isDragging = true;
+      wasDragged = false;
+      const event = e.type.startsWith('touch') ? e.touches[0] : e;
+      const rect = globalExplainButton.getBoundingClientRect();
+
+      startX = event.clientX;
+      startY = event.clientY;
+      offsetX = startX - rect.left;
+      offsetY = startY - rect.top;
+
+      document.addEventListener('mousemove', onPointerMove);
+      document.addEventListener('mouseup', onPointerUp);
+      document.addEventListener('touchmove', onPointerMove, { passive: false });
+      document.addEventListener('touchend', onPointerUp);
+
+      if (e.type === 'touchstart') e.preventDefault();
+    };
+
+    const onPointerMove = (e) => {
+      if (!isDragging) return;
+      const event = e.type.startsWith('touch') ? e.touches[0] : e;
+      const dx = event.clientX - startX;
+      const dy = event.clientY - startY;
+
+      if (!wasDragged && (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold)) {
+        wasDragged = true;
+      }
+
+      if (wasDragged) {
+          let x = event.clientX - offsetX;
+          let y = event.clientY - offsetY;
+          const rect = globalExplainButton.getBoundingClientRect();
+          x = Math.max(0, Math.min(x, window.innerWidth - rect.width));
+          y = Math.max(0, Math.min(y, window.innerHeight - rect.height));
+          globalExplainButton.style.left = `${x}px`;
+          globalExplainButton.style.top = `${y}px`;
+          globalExplainButton.style.right = 'auto';
+          globalExplainButton.style.bottom = 'auto';
+      }
+      if (e.type === 'touchmove') e.preventDefault();
+    };
+
+    const onPointerUp = async () => {
+      if (!wasDragged) {
+        // This was a click, not a drag
+        const apiKey = await requestGeminiApiKey();
+        startGlobalInspector(apiKey);
+      }
+
+      isDragging = false;
+      document.removeEventListener('mousemove', onPointerMove);
+      document.removeEventListener('mouseup', onPointerUp);
+      document.removeEventListener('touchmove', onPointerMove);
+      document.removeEventListener('touchend', onPointerUp);
+    };
+
+    globalExplainButton.addEventListener('mousedown', onPointerDown);
+    globalExplainButton.addEventListener('touchstart', onPointerDown, { passive: false });
   }
 
   aiExplainButton.addEventListener('click', async () => {

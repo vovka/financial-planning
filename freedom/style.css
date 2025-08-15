@@ -292,6 +292,9 @@ th { background-color: #f4f4f4; }
 .cursor-help-active, .cursor-help-active * {
   cursor: help !important;
 }
+.cursor-wait-active, .cursor-wait-active * {
+  cursor: wait !important;
+}
 
 /* Explanation Popover Styles */
 .popover {
