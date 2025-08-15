@@ -186,6 +186,85 @@ Generate a natural language summary.
     }
   }
 
+  function getInputs() {
+    const inputs = {
+      initial: document.getElementById('initial').value,
+      rate: document.getElementById('rate').value,
+      years: document.getElementById('years').value,
+      contribution: document.getElementById('contribution').value,
+      decreaseType: document.querySelector('input[name="decreaseType"]:checked').value,
+      decreaseValue: document.getElementById('decreaseValue').value,
+      contributionLimit: document.getElementById('contributionLimit').value,
+      frequency: document.querySelector('input[name="frequency"]:checked').value,
+      monthlyWithdrawal: document.getElementById('monthlyWithdrawal').value,
+      taxRate: document.getElementById('taxRate').value,
+      withdrawStartYear: document.getElementById('withdrawStartYear').value,
+      withdrawInflation: document.getElementById('withdrawInflation').value,
+    };
+    return inputs;
+  }
+
+  function generateShareUrl() {
+    const inputs = getInputs();
+    const jsonString = JSON.stringify(inputs);
+    const base64String = btoa(jsonString);
+    const url = new URL(window.location.href);
+    url.searchParams.set('data', base64String);
+    return url.toString();
+  }
+
+  const copyUrlButton = document.getElementById('copyUrlButton');
+  copyUrlButton.addEventListener('click', () => {
+    const url = generateShareUrl();
+    navigator.clipboard.writeText(url).then(() => {
+      copyUrlButton.textContent = 'Copied!';
+      setTimeout(() => {
+        copyUrlButton.textContent = 'Copy URL';
+      }, 2000);
+    }, () => {
+      alert('Failed to copy URL.');
+    });
+  });
+
+  function applyUrlData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const data = urlParams.get('data');
+    if (data) {
+      try {
+        const jsonString = atob(data);
+        const inputs = JSON.parse(jsonString);
+
+        document.getElementById('initial').value = inputs.initial;
+        document.getElementById('rate').value = inputs.rate;
+        document.getElementById('years').value = inputs.years;
+        document.getElementById('contribution').value = inputs.contribution;
+        document.querySelector(`input[name="decreaseType"][value="${inputs.decreaseType}"]`).checked = true;
+        document.getElementById('decreaseValue').value = inputs.decreaseValue;
+        document.getElementById('contributionLimit').value = inputs.contributionLimit;
+        document.querySelector(`input[name="frequency"][value="${inputs.frequency}"]`).checked = true;
+        document.getElementById('monthlyWithdrawal').value = inputs.monthlyWithdrawal;
+        document.getElementById('taxRate').value = inputs.taxRate;
+        document.getElementById('withdrawStartYear').value = inputs.withdrawStartYear;
+        document.getElementById('withdrawInflation').value = inputs.withdrawInflation;
+
+        // Sync sliders
+        const inputIds = ['initial', 'rate', 'years', 'contribution', 'decreaseValue', 'contributionLimit', 'monthlyWithdrawal', 'taxRate', 'withdrawStartYear', 'withdrawInflation'];
+        inputIds.forEach(id => {
+          const input = document.getElementById(id);
+          const slider = document.getElementById(id + 'Slider');
+          if (input && slider) {
+            slider.value = input.value;
+          }
+        });
+
+        triggerCalculation();
+      } catch (e) {
+        console.error('Failed to parse URL data:', e);
+      }
+    }
+  }
+
+  applyUrlData();
 });
 
 // This function now just contains the core calculation logic
