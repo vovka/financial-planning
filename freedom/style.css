@@ -268,3 +268,27 @@ th { background-color: #f4f4f4; }
   padding: 8px;
   margin-bottom: 10px;
 }
+
+/* Global Help Button */
+.global-help-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  font-size: 20px;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 200;
+}
+.global-help-btn:hover {
+  background-color: #2b82bf;
+}
+.cursor-help-active, .cursor-help-active * {
+  cursor: help !important;
+}

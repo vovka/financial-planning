@@ -106,6 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const apiKeyInput = document.getElementById('apiKeyInput');
   const explanationDiv = document.getElementById('ai-explanation');
 
+  const globalExplainButton = document.getElementById('globalExplainButton');
+  if (globalExplainButton) {
+    globalExplainButton.addEventListener('click', () => {
+      document.documentElement.classList.add('cursor-help-active');
+    });
+  }
+
   aiExplainButton.addEventListener('click', () => {
     let apiKey = localStorage.getItem('geminiApiKey');
     if (!apiKey) {
