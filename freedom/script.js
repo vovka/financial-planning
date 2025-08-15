@@ -150,17 +150,15 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('ElementInspector.configure failed', e);
     }
 
-    document.documentElement.classList.add('cursor-help-active');
-
-    // Add a one-time click listener to switch to a wait cursor
-    const switchCursorToWait = () => {
-      document.documentElement.classList.remove('cursor-help-active');
-      document.documentElement.classList.add('cursor-wait-active');
+    const overrides = {
+      pageHtml: document.documentElement.outerHTML,
+      onExplanationStart: () => {
+        document.documentElement.classList.add('cursor-wait-active');
+      },
+      onExplanationEnd: () => {
+        document.documentElement.classList.remove('cursor-wait-active');
+      },
     };
-    document.addEventListener('click', switchCursorToWait, { once: true, capture: true });
-
-
-    const overrides = { pageHtml: document.documentElement.outerHTML };
 
     window.ElementInspector.captureAndExplain(overrides)
       .then(function(out) {
@@ -205,12 +203,6 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .catch(function(err) {
         alert('Capture or explanation error: ' + (err && err.message));
-      })
-      .finally(function() {
-        // remove the temporary listener if it hasn't fired
-        document.removeEventListener('click', switchCursorToWait, { once: true, capture: true });
-        document.documentElement.classList.remove('cursor-help-active');
-        document.documentElement.classList.remove('cursor-wait-active');
       });
   }
 
@@ -241,8 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.addEventListener('mouseup', onPointerUp);
       document.addEventListener('touchmove', onPointerMove, { passive: false });
       document.addEventListener('touchend', onPointerUp);
-
-      if (e.type === 'touchstart') e.preventDefault();
     };
 
     const onPointerMove = (e) => {
