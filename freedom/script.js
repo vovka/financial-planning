@@ -49,6 +49,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         handleAutoRecalculate();
       });
+
+      // Enable scroll wheel adjustment when the slider is focused
+      slider.addEventListener('wheel', (e) => {
+        if (document.activeElement !== slider) return;
+        e.preventDefault();
+
+        const stepAttr = slider.getAttribute('step');
+        const step = stepAttr ? parseFloat(stepAttr) : 1;
+        const minAttr = slider.getAttribute('min');
+        const maxAttr = slider.getAttribute('max');
+        const min = minAttr !== null ? parseFloat(minAttr) : -Infinity;
+        const max = maxAttr !== null ? parseFloat(maxAttr) : Infinity;
+
+        const direction = e.deltaY < 0 ? 1 : -1; // up = increase, down = decrease
+        const multiplier = e.shiftKey ? 10 : 1; // hold Shift for faster changes
+
+        const current = parseFloat(slider.value || '0');
+        const next = current + direction * step * multiplier;
+        const bounded = Math.max(min, Math.min(max, next));
+        const decimals = (String(step).split('.')[1] || '').length;
+        const rounded = Number(bounded.toFixed(decimals));
+
+        slider.value = rounded;
+        input.value = rounded;
+        handleAutoRecalculate();
+      }, { passive: false });
     }
   }
 
