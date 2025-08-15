@@ -14,7 +14,14 @@
 <div class="main-container">
   <div class="form-wrapper">
     <div class="form-container">
-      <label>Initial Investment:
+      <label>
+        <div>Initial Investment:
+          <span class="tooltip" tabindex="0">?
+            <span class="tooltip-text">
+              The amount of money you start with in the investment before making any contributions.
+            </span>
+          </span>
+        </div>
         <div>
           <input type="number" id="initial" value="0">
           <input type="range" id="initialSlider" min="0" max="10000" step="10" value="0">
@@ -25,6 +32,7 @@
         <div>Annual Interest Rate (%)
           <span class="tooltip" tabindex="0">?
             <span class="tooltip-text">
+              The expected yearly return rate on your investment, before taxes and inflation.<br><br>
               Common averages:<br>
               • S&P 500 ETF: ~8%<br>
               • Govt Bonds: ~4%<br>
@@ -40,21 +48,42 @@
         </div>
       </label>
 
-      <label>Number of Years:
+      <label>
+        <div>Number of Years:
+          <span class="tooltip" tabindex="0">?
+            <span class="tooltip-text">
+              How long you plan to keep the investment running in total.
+            </span>
+          </span>
+        </div>
         <div>
           <input type="number" id="years" value="50" step="1">
           <input type="range" id="yearsSlider" min="1" max="100" step="1" value="50">
         </div>
       </label>
 
-      <label>Starting Annual Contribution:
+      <label>
+        <div>Starting Annual Contribution:
+          <span class="tooltip" tabindex="0">?
+            <span class="tooltip-text">
+              The amount you plan to add to the investment in the first year.
+            </span>
+          </span>
+        </div>
         <div>
           <input type="number" id="contribution" value="18000" step="10" min="0" max="100000">
           <input type="range" id="contributionSlider" min="0" max="100000" step="10" value="18000">
         </div>
       </label>
 
-      <label class="label-for-radio">Contribution Decrease Type:
+      <label class="label-for-radio">
+        <div>Contribution Decrease Type:
+          <span class="tooltip" tabindex="0">?
+            <span class="tooltip-text">
+              Choose whether contributions drop each year by a fixed amount or by a percentage.
+            </span>
+          </span>
+        </div>
         <div class="radio-group-horizontal">
           <input type="radio" id="decreaseFixed" name="decreaseType" value="fixed" checked>
           <label for="decreaseFixed">Fixed Amount</label>
@@ -63,21 +92,42 @@
         </div>
       </label>
 
-      <label>Decrease Value:
+      <label>
+        <div>Decrease Value:
+          <span class="tooltip" tabindex="0">?
+            <span class="tooltip-text">
+              How much your annual contribution decreases every year (in money or percent, based on your choice above).
+            </span>
+          </span>
+        </div>
         <div>
           <input type="number" id="decreaseValue" value="1500" step="10">
           <input type="range" id="decreaseValueSlider" min="0" max="5000" step="10" value="1500">
         </div>
       </label>
 
-      <label>Contribution Limit Years (leave blank for no limit):
+      <label>
+        <div>Contribution Limit Years:
+          <span class="tooltip" tabindex="0">?
+            <span class="tooltip-text">
+              The number of years you will keep making contributions. Leave blank if you will contribute until the end of the investment period.
+            </span>
+          </span>
+        </div>
         <div>
           <input type="number" id="contributionLimit" placeholder="" step="1">
           <input type="range" id="contributionLimitSlider" min="0" max="100" step="1" value="0">
         </div>
       </label>
 
-      <label class="label-for-radio">Compounding Frequency:
+      <label class="label-for-radio">
+        <div>Compounding Frequency:
+          <span class="tooltip" tabindex="0">?
+            <span class="tooltip-text">
+              How often the interest is added to your investment balance (yearly or monthly).
+            </span>
+          </span>
+        </div>
         <div class="radio-group-vertical">
           <input type="radio" id="freqYearly" name="frequency" value="1" checked>
           <label for="freqYearly">Yearly</label>
@@ -88,28 +138,56 @@
 
       <hr>
 
-      <label>Monthly Withdrawal (after start year) - Net (after tax):
+      <label>
+        <div>Monthly Withdrawal (after start year) – Net (after tax):
+          <span class="tooltip" tabindex="0">?
+            <span class="tooltip-text">
+              The amount you want to withdraw each month in today’s money, after taxes are taken out.
+            </span>
+          </span>
+        </div>
         <div>
           <input type="number" id="monthlyWithdrawal" value="1000" step="10">
           <input type="range" id="monthlyWithdrawalSlider" min="0" max="10000" step="10" value="1000">
         </div>
       </label>
 
-      <label>Investment Tax (%):
+      <label>
+        <div>Investment Tax (%):
+          <span class="tooltip" tabindex="0">?
+            <span class="tooltip-text">
+              The percentage of earnings taken as tax before calculating your withdrawals.
+            </span>
+          </span>
+        </div>
         <div>
           <input type="number" id="taxRate" value="23" step="1">
           <input type="range" id="taxRateSlider" min="0" max="100" step="1" value="23">
         </div>
       </label>
 
-      <label>Withdrawals Start After Year:
+      <label>
+        <div>Withdrawals Start After Year:
+          <span class="tooltip" tabindex="0">?
+            <span class="tooltip-text">
+              The number of years from the start after which you begin withdrawing money.
+            </span>
+          </span>
+        </div>
         <div>
           <input type="number" id="withdrawStartYear" value="20" step="1">
           <input type="range" id="withdrawStartYearSlider" min="1" max="100" step="1" value="20">
         </div>
       </label>
 
-      <label>Withdrawal Inflation Rate (% per year):
+      <label>
+        <div>Withdrawal Inflation Rate (% per year):
+          <span class="tooltip" tabindex="0">?
+            <span class="tooltip-text">
+              How much your withdrawals should grow each year to keep up with inflation.
+            </span>
+          </span>
+        </div>
         <div>
           <input type="number" id="withdrawInflation" value="3" step="0.1">
           <input type="range" id="withdrawInflationSlider" min="0" max="10" step="0.1" value="3">
