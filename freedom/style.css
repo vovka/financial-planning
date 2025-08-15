@@ -1,5 +1,19 @@
 body { font-family: Arial, sans-serif; margin: 20px; }
 
+.title-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+#copyUrlButton {
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  height: fit-content;
+}
+
 /* Layout Containers */
 .main-container {
   display: flex;
