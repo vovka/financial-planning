@@ -141,6 +141,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     hideExplanationPopover(); // Hide any previous popover
 
+    globalExplainButton.classList.add('active');
+
     try {
       window.ElementInspector.configure({
         apiKey: apiKey,
@@ -203,6 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
       })
       .catch(function(err) {
         alert('Capture or explanation error: ' + (err && err.message));
+      })
+      .finally(function() {
+        globalExplainButton.classList.remove('active');
       });
   }
 

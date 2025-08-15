@@ -285,6 +285,11 @@ th { background-color: #f4f4f4; }
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   cursor: pointer;
   z-index: 200;
+  transform: translateZ(0);
+  transition: background-color 0.3s ease;
+}
+.global-help-btn.active {
+  background-color: #28a745; /* A shade of green */
 }
 .global-help-btn:hover {
   background-color: #2b82bf;
