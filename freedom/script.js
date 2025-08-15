@@ -118,33 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function loadAiExplainLibrary() {
-    if (window.ElementInspector && typeof window.ElementInspector.configure === 'function') {
-      return Promise.resolve();
-    }
-    const candidates = [
-      'https://raw.githubusercontent.com/vovka/ai_explain_my_page/refs/heads/main/element-intelligence.js',
-      'https://raw.githubusercontent.com/vovka/ai_explain_my_page/main/element-intelligence.js'
-    ];
-    return new Promise((resolve, reject) => {
-      let index = 0;
-      function tryNext() {
-        if (index >= candidates.length) {
-          reject(new Error('Failed to load element-intelligence.js'));
-          return;
-        }
-        const url = candidates[index++];
-        const script = document.createElement('script');
-        script.src = url;
-        script.async = true;
-        script.onload = () => resolve();
-        script.onerror = () => tryNext();
-        document.head.appendChild(script);
-      }
-      tryNext();
-    });
-  }
-
   function startGlobalInspector(apiKey) {
     if (!window.ElementInspector || typeof window.ElementInspector.configure !== 'function') {
       alert('Global explain library is not available.');
@@ -185,11 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (globalExplainButton) {
     globalExplainButton.addEventListener('click', async () => {
       const apiKey = await requestGeminiApiKey();
-      try {
-        await loadAiExplainLibrary();
-      } catch (e) {
-        console.error(e);
-      }
       startGlobalInspector(apiKey);
     });
   }
