@@ -115,8 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const existing = localStorage.getItem('geminiApiKey');
     if (existing) return Promise.resolve(existing);
     apiKeyModal.style.display = 'block';
-    return new Promise((resolve) => {
-      apiKeyWaiters.push(resolve);
+    return new Promise((resolve, reject) => {
+      apiKeyWaiters.push({ resolve, reject });
     });
   }
 
@@ -150,17 +150,15 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('ElementInspector.configure failed', e);
     }
 
-    document.documentElement.classList.add('cursor-help-active');
-
-    // Add a one-time click listener to switch to a wait cursor
-    const switchCursorToWait = () => {
-      document.documentElement.classList.remove('cursor-help-active');
-      document.documentElement.classList.add('cursor-wait-active');
+    const overrides = {
+      pageHtml: document.documentElement.outerHTML,
+      onExplanationStart: () => {
+        document.documentElement.classList.add('cursor-wait-active');
+      },
+      onExplanationEnd: () => {
+        document.documentElement.classList.remove('cursor-wait-active');
+      },
     };
-    document.addEventListener('click', switchCursorToWait, { once: true, capture: true });
-
-
-    const overrides = { pageHtml: document.documentElement.outerHTML };
 
     window.ElementInspector.captureAndExplain(overrides)
       .then(function(out) {
@@ -207,18 +205,23 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Capture or explanation error: ' + (err && err.message));
       })
       .finally(function() {
-        // remove the temporary listener if it hasn't fired
-        document.removeEventListener('click', switchCursorToWait, { once: true, capture: true });
-        document.documentElement.classList.remove('cursor-help-active');
-        document.documentElement.classList.remove('cursor-wait-active');
+        globalExplainButton.classList.remove('active');
       });
   }
 
   const globalExplainButton = document.getElementById('globalExplainButton');
   if (globalExplainButton) {
     globalExplainButton.addEventListener('click', async () => {
-      const apiKey = await requestGeminiApiKey();
-      startGlobalInspector(apiKey);
+      if (globalExplainButton.classList.contains('active')) return;
+
+      globalExplainButton.classList.add('active');
+      try {
+        const apiKey = await requestGeminiApiKey();
+        startGlobalInspector(apiKey);
+      } catch (error) {
+        console.error(error);
+        globalExplainButton.classList.remove('active');
+      }
     });
     
     let isDragging = false;
@@ -241,8 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.addEventListener('mouseup', onPointerUp);
       document.addEventListener('touchmove', onPointerMove, { passive: false });
       document.addEventListener('touchend', onPointerUp);
-
-      if (e.type === 'touchstart') e.preventDefault();
     };
 
     const onPointerMove = (e) => {
@@ -286,9 +287,15 @@ document.addEventListener('DOMContentLoaded', () => {
     getAIExplanation(apiKey);
   });
 
-  closeButton.addEventListener('click', () => {
+  function cancelApiKeyRequest() {
     apiKeyModal.style.display = 'none';
-  });
+    if (apiKeyWaiters.length) {
+      apiKeyWaiters.forEach(({ reject }) => reject(new Error('API key request cancelled by user.')));
+      apiKeyWaiters = [];
+    }
+  }
+
+  closeButton.addEventListener('click', cancelApiKeyRequest);
 
   saveApiKeyButton.addEventListener('click', () => {
     const apiKey = apiKeyInput.value.trim();
@@ -296,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('geminiApiKey', apiKey);
       apiKeyModal.style.display = 'none';
       if (apiKeyWaiters.length) {
-        apiKeyWaiters.forEach((resolve) => resolve(apiKey));
+        apiKeyWaiters.forEach(({ resolve }) => resolve(apiKey));
         apiKeyWaiters = [];
       }
     } else {
@@ -306,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('click', (event) => {
     if (event.target == apiKeyModal) {
-      apiKeyModal.style.display = 'none';
+      cancelApiKeyRequest();
     }
   });
 
