@@ -292,3 +292,45 @@ th { background-color: #f4f4f4; }
 .cursor-help-active, .cursor-help-active * {
   cursor: help !important;
 }
+
+/* Explanation Popover Styles */
+.popover {
+  display: none; /* Hidden by default */
+  position: absolute;
+  z-index: 200;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 15px;
+  max-width: 300px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.popover-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+.popover.arrow-bottom .popover-arrow {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 10px 10px 0 10px;
+  border-color: #fff transparent transparent transparent;
+}
+
+/* This is a filter to make the arrow border match the popover border */
+.popover.arrow-bottom .popover-arrow::after {
+  content: "";
+  position: absolute;
+  top: -11px; /* (border-width - 1px) */
+  left: -10px;
+  border-width: 10px 10px 0 10px;
+  border-style: solid;
+  border-color: #ccc transparent transparent transparent;
+  z-index: -1;
+}
