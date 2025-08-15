@@ -106,13 +106,97 @@ document.addEventListener('DOMContentLoaded', () => {
   const apiKeyInput = document.getElementById('apiKeyInput');
   const explanationDiv = document.getElementById('ai-explanation');
 
-  aiExplainButton.addEventListener('click', () => {
-    let apiKey = localStorage.getItem('geminiApiKey');
-    if (!apiKey) {
-      apiKeyModal.style.display = 'block';
-    } else {
-      getAIExplanation(apiKey);
+  const applicationDescription = `Investment Calculator & Withdrawal Planner\n\nThis single-page tool lets users model long-term investing with:\n- initial capital\n- annual interest rate, compounded yearly or monthly\n- annual contributions that can decrease each year (fixed amount or percent), with an optional contribution limit in years\n- taxes applied to investment gains\n- a retirement phase with net (after-tax) monthly withdrawals that begin after a chosen year and grow with inflation\n\nThe left panel is a sticky form with numeric inputs, sliders, and radio groups. The right panel shows a table of per-year results including annual and monthly contributions, gross withdrawals, and ending balance. As inputs change after the first run, calculations auto-debounce.\n\nAdditional features:\n- inline tooltips explain each field\n- a 'Copy URL' button serializes current inputs into the query string for sharing\n- an 'AI Explain' button summarizes the plan using Google Gemini, based on current inputs and the last computed results.`;
+
+  let apiKeyWaiters = [];
+  function requestGeminiApiKey() {
+    const existing = localStorage.getItem('geminiApiKey');
+    if (existing) return Promise.resolve(existing);
+    apiKeyModal.style.display = 'block';
+    return new Promise((resolve) => {
+      apiKeyWaiters.push(resolve);
+    });
+  }
+
+  function loadAiExplainLibrary() {
+    if (window.ElementInspector && typeof window.ElementInspector.configure === 'function') {
+      return Promise.resolve();
     }
+    const candidates = [
+      'https://raw.githubusercontent.com/vovka/ai_explain_my_page/refs/heads/main/element-intelligence.js',
+      'https://raw.githubusercontent.com/vovka/ai_explain_my_page/main/element-intelligence.js'
+    ];
+    return new Promise((resolve, reject) => {
+      let index = 0;
+      function tryNext() {
+        if (index >= candidates.length) {
+          reject(new Error('Failed to load element-intelligence.js'));
+          return;
+        }
+        const url = candidates[index++];
+        const script = document.createElement('script');
+        script.src = url;
+        script.async = true;
+        script.onload = () => resolve();
+        script.onerror = () => tryNext();
+        document.head.appendChild(script);
+      }
+      tryNext();
+    });
+  }
+
+  function startGlobalInspector(apiKey) {
+    if (!window.ElementInspector || typeof window.ElementInspector.configure !== 'function') {
+      alert('Global explain library is not available.');
+      return;
+    }
+
+    // Configure with the current key and description just-in-time
+    try {
+      window.ElementInspector.configure({
+        apiKey: apiKey,
+        applicationDescription: applicationDescription
+      });
+    } catch (e) {
+      console.error('ElementInspector.configure failed', e);
+    }
+
+    // Toggle help cursor during capture/explain lifecycle
+    document.documentElement.classList.add('cursor-help-active');
+    const overrides = { pageHtml: document.documentElement.outerHTML };
+    window.ElementInspector.captureAndExplain(overrides)
+      .then(function(out) {
+        console.log('Captured element:', out && out.element);
+        if (out && out.result && out.result.ok) {
+          console.log('[Explanation]', out.result.answerText);
+        } else if (out && out.result) {
+          console.warn('Explanation failed:', out.result.message || out.result.code);
+        }
+      })
+      .catch(function(err) {
+        console.warn('Capture or explanation error:', err && err.message);
+      })
+      .finally(function() {
+        document.documentElement.classList.remove('cursor-help-active');
+      });
+  }
+
+  const globalExplainButton = document.getElementById('globalExplainButton');
+  if (globalExplainButton) {
+    globalExplainButton.addEventListener('click', async () => {
+      const apiKey = await requestGeminiApiKey();
+      try {
+        await loadAiExplainLibrary();
+      } catch (e) {
+        console.error(e);
+      }
+      startGlobalInspector(apiKey);
+    });
+  }
+
+  aiExplainButton.addEventListener('click', async () => {
+    const apiKey = await requestGeminiApiKey();
+    getAIExplanation(apiKey);
   });
 
   closeButton.addEventListener('click', () => {
@@ -124,7 +208,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (apiKey) {
       localStorage.setItem('geminiApiKey', apiKey);
       apiKeyModal.style.display = 'none';
-      getAIExplanation(apiKey);
+      if (apiKeyWaiters.length) {
+        apiKeyWaiters.forEach((resolve) => resolve(apiKey));
+        apiKeyWaiters = [];
+      }
     } else {
       alert('Please enter a valid API key.');
     }
