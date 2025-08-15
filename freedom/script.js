@@ -233,8 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.addEventListener('mouseup', onPointerUp);
       document.addEventListener('touchmove', onPointerMove, { passive: false });
       document.addEventListener('touchend', onPointerUp);
-
-      if (e.type === 'touchstart') e.preventDefault();
     };
 
     const onPointerMove = (e) => {
