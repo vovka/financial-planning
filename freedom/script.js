@@ -115,21 +115,51 @@ document.addEventListener('DOMContentLoaded', () => {
     const existing = localStorage.getItem('geminiApiKey');
     if (existing) return Promise.resolve(existing);
     apiKeyModal.style.display = 'block';
-    return new Promise((resolve) => {
-      apiKeyWaiters.push(resolve);
+    return new Promise((resolve, reject) => {
+      apiKeyWaiters.push({ resolve, reject });
     });
   }
 
-  function hideExplanationPopover() {
+  function hidePopover() {
     if (explanationPopover.style.display === 'block') {
       explanationPopover.style.display = 'none';
       document.removeEventListener('click', handleOutsideClick, true);
     }
   }
 
+  function showPopover(targetElement, text, addOutsideClickListener) {
+    explanationPopoverContent.textContent = text;
+    explanationPopover.style.display = 'block';
+    const popoverRect = explanationPopover.getBoundingClientRect();
+    const rect = targetElement.getBoundingClientRect();
+
+    let top = rect.top - popoverRect.height - 15;
+    let left = rect.left + (rect.width / 2) - (popoverRect.width / 2);
+
+    explanationPopover.classList.remove('arrow-bottom');
+    if (top < 0) {
+      top = rect.bottom + 15;
+    } else {
+      explanationPopover.classList.add('arrow-bottom');
+    }
+    if (left < 0) left = 10;
+    if (left + popoverRect.width > window.innerWidth) {
+      left = window.innerWidth - popoverRect.width - 10;
+    }
+
+    explanationPopover.style.top = `${top + window.scrollY}px`;
+    explanationPopover.style.left = `${left + window.scrollX}px`;
+
+    if (addOutsideClickListener) {
+      setTimeout(() => {
+        document.addEventListener('click', handleOutsideClick, true);
+      }, 100);
+    }
+  }
+
   function handleOutsideClick(event) {
     if (!explanationPopover.contains(event.target)) {
-      hideExplanationPopover();
+      hidePopover();
     }
   }
 
@@ -139,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    hideExplanationPopover(); // Hide any previous popover
+    hidePopover(); // Hide any previous popover
 
     try {
       window.ElementInspector.configure({
@@ -150,55 +180,20 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('ElementInspector.configure failed', e);
     }
 
-    document.documentElement.classList.add('cursor-help-active');
-
-    // Add a one-time click listener to switch to a wait cursor
-    const switchCursorToWait = () => {
-      document.documentElement.classList.remove('cursor-help-active');
-      document.documentElement.classList.add('cursor-wait-active');
+    const overrides = {
+      pageHtml: document.documentElement.outerHTML,
+      onExplanationStart: () => {
+        document.documentElement.classList.add('cursor-wait-active');
+      },
+      onExplanationEnd: () => {
+        document.documentElement.classList.remove('cursor-wait-active');
+      },
     };
-    document.addEventListener('click', switchCursorToWait, { once: true, capture: true });
-
-
-    const overrides = { pageHtml: document.documentElement.outerHTML };
 
     window.ElementInspector.captureAndExplain(overrides)
       .then(function(out) {
         if (out && out.result && out.result.ok) {
-          const targetElement = out.element;
-          const explanation = out.result.answerText;
-
-          explanationPopoverContent.textContent = explanation;
-
-          // Must be visible for getBoundingClientRect to work correctly
-          explanationPopover.style.display = 'block';
-          const popoverRect = explanationPopover.getBoundingClientRect();
-          const rect = targetElement.getBoundingClientRect();
-
-          // Position popover above the element
-          let top = rect.top - popoverRect.height - 15; // 15px for arrow and spacing
-          let left = rect.left + (rect.width / 2) - (popoverRect.width / 2);
-
-          // Adjust if it goes off-screen
-          explanationPopover.classList.remove('arrow-bottom'); // Reset arrow
-          if (top < 0) {
-            top = rect.bottom + 15; // position below instead
-            // TODO: Add 'arrow-top' class and styles if needed
-          } else {
-            explanationPopover.classList.add('arrow-bottom');
-          }
-          if (left < 0) left = 10;
-          if (left + popoverRect.width > window.innerWidth) left = window.innerWidth - popoverRect.width - 10;
-
-
-          explanationPopover.style.top = `${top + window.scrollY}px`;
-          explanationPopover.style.left = `${left + window.scrollX}px`;
-
-          // use timeout to avoid capturing the same click that opened it
-          setTimeout(() => {
-            document.addEventListener('click', handleOutsideClick, true);
-          }, 100);
-
+          showPopover(out.element, out.result.answerText, true);
         } else if (out && out.result) {
           alert('Explanation failed: ' + (out.result.message || out.result.code));
         }
@@ -207,18 +202,27 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Capture or explanation error: ' + (err && err.message));
       })
       .finally(function() {
-        // remove the temporary listener if it hasn't fired
-        document.removeEventListener('click', switchCursorToWait, { once: true, capture: true });
-        document.documentElement.classList.remove('cursor-help-active');
-        document.documentElement.classList.remove('cursor-wait-active');
+        globalExplainButton.classList.remove('active');
+        hidePopover();
       });
   }
 
   const globalExplainButton = document.getElementById('globalExplainButton');
   if (globalExplainButton) {
     globalExplainButton.addEventListener('click', async () => {
-      const apiKey = await requestGeminiApiKey();
-      startGlobalInspector(apiKey);
+      if (globalExplainButton.classList.contains('active')) return;
+
+      globalExplainButton.classList.add('active');
+      showPopover(globalExplainButton, 'Now click/touch any element on the page to get a hint about it.', false);
+
+      try {
+        const apiKey = await requestGeminiApiKey();
+        startGlobalInspector(apiKey);
+      } catch (error) {
+        console.error(error);
+        globalExplainButton.classList.remove('active');
+        hidePopover();
+      }
     });
     
     let isDragging = false;
@@ -241,8 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.addEventListener('mouseup', onPointerUp);
       document.addEventListener('touchmove', onPointerMove, { passive: false });
       document.addEventListener('touchend', onPointerUp);
-
-      if (e.type === 'touchstart') e.preventDefault();
     };
 
     const onPointerMove = (e) => {
@@ -286,9 +288,15 @@ document.addEventListener('DOMContentLoaded', () => {
     getAIExplanation(apiKey);
   });
 
-  closeButton.addEventListener('click', () => {
+  function cancelApiKeyRequest() {
     apiKeyModal.style.display = 'none';
-  });
+    if (apiKeyWaiters.length) {
+      apiKeyWaiters.forEach(({ reject }) => reject(new Error('API key request cancelled by user.')));
+      apiKeyWaiters = [];
+    }
+  }
+
+  closeButton.addEventListener('click', cancelApiKeyRequest);
 
   saveApiKeyButton.addEventListener('click', () => {
     const apiKey = apiKeyInput.value.trim();
@@ -296,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('geminiApiKey', apiKey);
       apiKeyModal.style.display = 'none';
       if (apiKeyWaiters.length) {
-        apiKeyWaiters.forEach((resolve) => resolve(apiKey));
+        apiKeyWaiters.forEach(({ resolve }) => resolve(apiKey));
         apiKeyWaiters = [];
       }
     } else {
@@ -306,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('click', (event) => {
     if (event.target == apiKeyModal) {
-      apiKeyModal.style.display = 'none';
+      cancelApiKeyRequest();
     }
   });
 
