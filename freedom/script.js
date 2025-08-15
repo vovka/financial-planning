@@ -216,6 +216,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const globalExplainButton = document.getElementById('globalExplainButton');
   if (globalExplainButton) {
+    globalExplainButton.addEventListener('click', async () => {
+      const apiKey = await requestGeminiApiKey();
+      startGlobalInspector(apiKey);
+    });
+    
     let isDragging = false;
     let wasDragged = false;
     let startX, startY, offsetX, offsetY;
@@ -265,12 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const onPointerUp = async () => {
-      if (!wasDragged) {
-        // This was a click, not a drag
-        const apiKey = await requestGeminiApiKey();
-        startGlobalInspector(apiKey);
-      }
-
       isDragging = false;
       document.removeEventListener('mousemove', onPointerMove);
       document.removeEventListener('mouseup', onPointerUp);
