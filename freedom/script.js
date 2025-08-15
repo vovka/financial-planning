@@ -171,6 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     hidePopover(); // Hide any previous popover
 
+    globalExplainButton.classList.add('active');
+
     try {
       window.ElementInspector.configure({
         apiKey: apiKey,
